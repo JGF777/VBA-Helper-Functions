@@ -15,66 +15,72 @@ Attribute VB_Name = "GITHUB"
 
 Public Function Visual_Mods(switch As Boolean)
 
-'Function that controls the main visualization indicators
-'It takes one boolean argument
+    'Function that controls the main visualization indicators
+    'It takes one boolean argument
 
-With Application
-    .ScreenUpdating = switch
-    .DisplayAlerts = switch
-End With
+    With Application
+        .ScreenUpdating = switch
+        .DisplayAlerts = switch
+    End With
 
 End Function
+
+'---------------------------------------------------------------------------
 
 Public Function OpenWb(NameFile As String) As Workbook
 
 'Function that opens a wb through the Microsoft dialogue window
 'accepts one string as argument
 
-Dim wb As Workbook
-Dim FileName As String
-Dim fd As Office.FileDialog
+    Dim wb As Workbook
+    Dim FileName As String
+    Dim fd As Office.FileDialog
 
-Set fd = Application.FileDialog(msoFileDialogFilePicker)
+    Set fd = Application.FileDialog(msoFileDialogFilePicker)
 
-With fd
+    With fd
 
-    .AllowMultiSelect = False
-    .Title = "Select " & NameFile
-    .Show
+        .AllowMultiSelect = False
+        .Title = "Select " & NameFile
+        .Show
 
-End With
+    End With
 
-On Error Resume Next
+    On Error Resume Next
 
-FileName = fd.SelectedItems(1)
+    FileName = fd.SelectedItems(1)
 
-On Error GoTo 0
+    On Error GoTo 0
 
-Set wb = Workbooks.Open(FileName)
-Set OpenWb = wb
+    Set wb = Workbooks.Open(FileName)
+    Set OpenWb = wb
 
 End Function
 
+'---------------------------------------------------------------------------  
+        
 Public Function Edit_Links(wbk1 As Workbook, wbk2 As Workbook)
 
 'Function that edits workbooks' links to change the references accordingly.
 'The purpose is to referece itself, mainly used for periodical update of differente templates
 'Takes 2 neccesary workbooks as arguments
 
-Dim filelink As String
-Dim NameFile As String
-Dim path As String
+    Dim filelink As String
+    Dim NameFile As String
+    Dim path As String
 
-filelink = wbk1.FullName '(ex: c:\\myDocuments\workbook.xlsx)
-NameFile = wbk2.Name '(ex: workbook.xlsx)
-path = wbk1.path '(c:\\myDocuments)
+    filelink = wbk1.FullName '(ex: c:\\myDocuments\workbook.xlsx)
+    NameFile = wbk2.Name '(ex: workbook.xlsx)
+    path = wbk1.path '(c:\\myDocuments)
 
-ChDir path
-wbk2.ChangeLink Name:= _
-filelink, NewName:= _
-NameFile, Type:=xlExcelLinks
+    ChDir path
+    wbk2.ChangeLink Name:= _
+    filelink, NewName:= _
+    NameFile, Type:=xlExcelLinks
 
 End Function
+        
+'---------------------------------------------------------------------------
 
 Public Function Copy_Sheet(WsName As String, WbCopy As Workbook, WbPaste As Workbook)
 
@@ -85,13 +91,15 @@ Public Function Copy_Sheet(WsName As String, WbCopy As Workbook, WbPaste As Work
 '-WbCopy as the wb source of the data
 '-WbPaste as the wb destination of the data
 
-With WbCopy.Sheets(WsName)
-    .Activate
-    .Select
-    .Copy Before:=WbPaste.Sheets(1)
-End With
+    With WbCopy.Sheets(WsName)
+        .Activate
+        .Select
+        .Copy Before:=WbPaste.Sheets(1)
+    End With
 
 End Function
+            
+'---------------------------------------------------------------------------
 
 Public Function ChangeSource(WsName As String, PTName As String, Optional WsofPtName As String)
 
@@ -112,6 +120,8 @@ Public Function ChangeSource(WsName As String, PTName As String, Optional WsofPt
     ActiveWorkbook.Worksheets(WsofPtName).PivotTables(1).SaveData = True
         
 End Function
+           
+'---------------------------------------------------------------------------
 
 Public Function Copy_Table(wbk1 As Workbook, wbk2 As Workbook, WsTemplate As String, wsSource As String)
   
@@ -128,6 +138,8 @@ Public Function Copy_Table(wbk1 As Workbook, wbk2 As Workbook, WsTemplate As Str
     End With
         
 End Function
+            
+'---------------------------------------------------------------------------
 
 Public Function Filter_Pt_Bytype(PtField As String, coll As Collection, PTName As String)
 
@@ -159,6 +171,8 @@ Public Function Filter_Pt_Bytype(PtField As String, coll As Collection, PTName A
     Next pvtitem
 
 End Function
+    
+'---------------------------------------------------------------------------
 
 Public Function Get_absolutevalue(wbk As Workbook, WsTemplate As String, RangeAbsolute As String)
 
@@ -168,30 +182,34 @@ Public Function Get_absolutevalue(wbk As Workbook, WsTemplate As String, RangeAb
 '   -WsTemplate as the worksheet with the raw copied data
 '   -RangeAbsolute as string with the range we wanna loop through to convert to absolute values
 
-wbk.Worksheets(WsTemplate).Activate
+    wbk.Worksheets(WsTemplate).Activate
 
-Dim range_Toloop As Range
-Dim cell As Variant
+    Dim range_Toloop As Range
+    Dim cell As Variant
 
-Set range_Toloop = ActiveSheet.Range(RangeAbsolute)
+    Set range_Toloop = ActiveSheet.Range(RangeAbsolute)
 
-For Each cell In range_Toloop
+    For Each cell In range_Toloop
 
-    If cell.Value <> "" Then
-        cell.Value = cell.Value * -1
-    End If
+        If cell.Value <> "" Then
+            cell.Value = cell.Value * -1
+        End If
 
-Next cell
+    Next cell
 
 End Function
+    
+'---------------------------------------------------------------------------
 
 Public Function BotWait(Seconds As String)
 
 'Sleep function used in different scraping projects.
 
-Application.Wait Now + TimeValue("00:00:" & Seconds)
+    Application.Wait Now + TimeValue("00:00:" & Seconds)
 
 End Function
+    
+'---------------------------------------------------------------------------
 
 Function GetFile(NameItem As String, FolderPath As String)
 
