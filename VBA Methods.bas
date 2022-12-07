@@ -1,17 +1,18 @@
 Attribute VB_Name = "GITHUB"
-'*************************************************************************************************************
+'*******************************************************************************************************************************
 '
 '     - The following functions/sub routines are implemented as methods of one class that acts as a "helper" for many
-'       different projects that I've developed in my job. Their main purpose is to help in other modules
-'       that focus on automating monthly/weekly financial reports.
+'       different projects that I've developed in my job based on OOP proggramming logic. 
+'       Their main purpose is to help in other modules that focus on automating financial reports/analysis
 '
 'DISCLAIMER: I've tried to make those functions as dynamic as possible, however they could
-'be further adapted to other projects depending on each person's needs and the singularities of their
-'projects.
+'be further adapted to other projects depending on each person's needs and the singularities of the aforementioned projects
 '
+'--------------------------------------
 'Developed by Jacobo G.F 2022
+'--------------------------------------
 '
-'**************************************************************************************************************
+'*******************************************************************************************************************************
 
 Public Function Visual_Mods(switch As Boolean)
 
@@ -150,25 +151,29 @@ Public Function Filter_Pt_Bytype(PtField As String, coll As Collection, PTName A
     Dim pvtitem As PivotItem
     Dim i As Integer
 
-    For Each pvtitem In ActiveSheet.PivotTables(PTName).PivotFields(PtField).PivotItems
-        
-        For i = 1 To coll.Count
+    With ActiveSheet.PivotTables("glTable").PivotFields(Field)
+    
+        For Each pvtitem In .PivotItems
             
-            If coll(i) = pvtitem.Value Then
-            
-                ActiveSheet.PivotTables(PTName).PivotFields(PtField).PivotItems(pvtitem.Value).Visible = True
-        
-                Exit For
+            For i = 1 To coll.Count
                 
-            ElseIf coll(i) <> pvtitem.Value Then
-        
-                ActiveSheet.PivotTables(PTName).PivotFields(PtField).PivotItems(pvtitem.Value).Visible = False
+                If coll(i) = pvtitem.Value Then
                 
-            End If
+                    .PivotItems(pvtitem.Value).Visible = True
             
-        Next i
+                    Exit For
+                    
+                ElseIf coll(i) <> pvtitem.Value Then
+            
+                    .PivotItems(pvtitem.Value).Visible = False
+                    
+                End If
+                
+            Next i
+            
+        Next pvtitem
         
-    Next pvtitem
+    End With
 
 End Function
     
@@ -189,11 +194,15 @@ Public Function Get_absolutevalue(wbk As Workbook, WsTemplate As String, RangeAb
 
     Set range_Toloop = ActiveSheet.Range(RangeAbsolute)
 
-    For Each cell In range_Toloop
+    For Each cell In rango_Toloop
 
-        If cell.Value <> "" Then
-            cell.Value = cell.Value * -1
-        End If
+        With cell
+
+            If .Value <> "" Then
+                .Value = Abs(.Value)
+            End If
+
+        End With
 
     Next cell
 
@@ -239,3 +248,130 @@ For Each FileItem In SourceFolder.Files
 Next FileItem
 
 End Function
+               
+'---------------------------------------------------------------------------                
+                
+Function ColumnLettersFromRange(rInput As Range) As String
+
+'Gets the string of the column, it s used to pass the ouput for the filldown method
+'It takes one argument. Desired range to obtain the columnstring
+                    
+    ColumnLettersFromRange = Split(rInput.Address, "$")(1)
+
+End Function
+
+'---------------------------------------------------------------------------                          
+                
+Function FindRowNum(Type As String)
+
+'Function that finds the row number of the totals of the different expenses types
+'Returns a number to pass to another sub
+    
+ Dim rng As Range
+ Dim rownumber As Long
+
+ Set rng = ActiveSheet.Columns("B:B").find(What:=Type, _
+    LookIn:=xlValues, LookAt:=xlWhole, SearchOrder:=xlByRows, _
+    SearchDirection:=xlNext, MatchCase:=False, SearchFormat:=False)
+    
+    rownumber = rng.Row
+    
+    FindRowNum = rownumber
+
+End Function
+                    
+'---------------------------------------------------------------------------
+                    
+Public Function clear_other_bars(NameBar As String)
+                        
+'Funcion used in userframes.
+'Function that is responsible for dynamically clearing the other comboboxes value whenever the user is selecting
+'different comboboxes
+'It takes one argument:
+'   'Name of the actual bar that we want to control and clear the rest, as a string
+
+Dim cont As Control
+Dim cont2 As Control
+
+For Each cont In MainUI.Controls
+
+    If cont.Name = NameBar Then
+        
+            For Each cont2 In MainUI.Controls
+            
+                            If TypeName(cont2) = "ComboBox" And cont2.Name <> NameBar Then 'It must fulfil two conditions,
+                                                                                            'so we make sure we are looping through
+                    If cont2.Value <> 0 Then                                                'only the comboboxes whose value we want
+                                                                                            'to clear.
+                        cont2.Value = ""
+                        
+                    End If
+    
+                End If
+                
+           Next cont2
+           
+    End If
+    
+Next cont
+
+End Function
+
+'---------------------------------------------------------------------------            
+            
+Public Function populate_dropdown(arr As Variant, bar As Control, counter As Integer)
+
+'Populates a dropdown menu by adding the relevant items from an array
+'it takes three arguments:
+'   -An array with the strings of the different procedures
+'   -The name of each of the dropwdown menus passed as control
+'   -A counter to limit the amount of items created in each bar, equal to the total amount of tasks per bar
+
+Dim uB As Integer, lB As Integer, i As Integer
+
+uB = UBound(arr)
+lB = LBound(arr)
+
+With bar
+
+    If .ListCount < counter Then
+    
+        For i = lB To uB
+    
+            .AddItem arr(i)
+        
+        Next i
+        
+    End If
+
+End With
+
+End Function
+ 
+'---------------------------------------------------------------------------        
+
+Sub Sizable()
+
+'Main procedure to make the form resizable, it is called in the form initialize event
+            
+'Private Declare PtrSafe Function FindWindow Lib "user32" Alias "FindWindowA" (ByVal lpClassName As String, ByVal lpWindowName As String) As Long
+'Private Declare PtrSafe Function GetWindowLong Lib "user32.dll" Alias "GetWindowLongA" (ByVal hwnd As Long, ByVal nIndex As Long) As Long
+'Private Declare PtrSafe Function SetWindowLong Lib "user32.dll" Alias "SetWindowLongA" (ByVal hwnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
+'Private Const GWL_STYLE As Long = (-16)        
+            
+Dim hWndForm As Long
+Dim iStyle As Long
+
+'Get the userform's window handle
+If Val(Application.Version) < 9 Then
+    hWndForm = FindWindow("ThunderXFrame", Me.Caption)  'XL97
+Else
+    hWndForm = FindWindow("ThunderDFrame", Me.Caption)  'XL2000
+End If
+
+'Make the form resizable
+iStyle = GetWindowLong(hWndForm, GWL_STYLE)
+iStyle = iStyle Or WS_THICKFRAME
+SetWindowLong hWndForm, GWL_STYLE, iStyle
+ 
+End Sub        
