@@ -142,7 +142,7 @@ End Function
             
 '---------------------------------------------------------------------------
 
-Public Function Filter_Pt_Bytype(PtField As String, coll As Collection, PTName As String)
+Public Function Filter_Pt_Bytype(Field As String, coll As Collection, PTName As String)
 
     'Function that filters a PT.
     'It takes 2 arguments, a collection with the items that we want to filter and the name
@@ -151,7 +151,7 @@ Public Function Filter_Pt_Bytype(PtField As String, coll As Collection, PTName A
     Dim pvtitem As PivotItem
     Dim i As Integer
 
-    With ActiveSheet.PivotTables("glTable").PivotFields(Field)
+                With ActiveSheet.PivotTables(PTName).PivotFields(Field)
     
         For Each pvtitem In .PivotItems
             
