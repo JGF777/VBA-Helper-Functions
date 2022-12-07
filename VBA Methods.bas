@@ -359,19 +359,86 @@ Sub Sizable()
 'Private Declare PtrSafe Function SetWindowLong Lib "user32.dll" Alias "SetWindowLongA" (ByVal hwnd As Long, ByVal nIndex As Long, ByVal dwNewLong As Long) As Long
 'Private Const GWL_STYLE As Long = (-16)        
             
-Dim hWndForm As Long
-Dim iStyle As Long
+    Dim hWndForm As Long
+    Dim iStyle As Long
 
-'Get the userform's window handle
-If Val(Application.Version) < 9 Then
-    hWndForm = FindWindow("ThunderXFrame", Me.Caption)  'XL97
-Else
-    hWndForm = FindWindow("ThunderDFrame", Me.Caption)  'XL2000
-End If
+    'Get the userform's window handle
+    If Val(Application.Version) < 9 Then
+        hWndForm = FindWindow("ThunderXFrame", Me.Caption)  'XL97
+    Else
+        hWndForm = FindWindow("ThunderDFrame", Me.Caption)  'XL2000
+    End If
 
-'Make the form resizable
-iStyle = GetWindowLong(hWndForm, GWL_STYLE)
-iStyle = iStyle Or WS_THICKFRAME
-SetWindowLong hWndForm, GWL_STYLE, iStyle
+    'Make the form resizable
+    iStyle = GetWindowLong(hWndForm, GWL_STYLE)
+    iStyle = iStyle Or WS_THICKFRAME
+    SetWindowLong hWndForm, GWL_STYLE, iStyle
  
-End Sub        
+End Sub   
+        
+'---------------------------------------------------------------------------    
+'
+'The following two functions/sub routines are .txt related, particularly       
+'about how to read/write files for specific values programmatically
+'
+'---------------------------------------------------------------------------        
+
+Sub ChangeValue(NEWValue As String)
+
+    'This subroutine updates the  value based on the given argument
+    
+    Dim OLDValue As String
+    OLDValue = FindOldValue
+
+    Open EXCPpath For Input As #1
+    c0 = Input(LOF(1), #1)
+    Close #1
+
+    Open EXCPpath For Output As #1
+    Print #1, Replace(c0, OLDValue, NEWValue)
+    Close #1
+    
+End Sub
+        
+'---------------------------------------------------------------------------            
+ 
+Function  FindOldValue() As String
+
+    'Finds the relevant line containing the old num value by filtering the "6.." 
+    'It returns the old CNUM as string to pass to the main change value.
+            
+Dim Jno As String
+Dim strLine As String
+Dim JnoToCheck As String
+Dim CleanValue As String
+
+Open EXCPpath For Input As #1
+     
+    Jno = "<input value=""6"
+
+Do While Not EOF(1)
+ 
+        IngLine = IngLine + 1
+        
+        Line Input #1, strLine
+        
+        If InStr(1, strLine, Jno, vbTextCompare) > 1 Then
+    
+            JnoToCheck = Trim(Split(strLine, "input value=""")(1))      'The logic can be easily adapted for the Jno and JnotoCheck variables. 
+                                                                        'depending on the variables that we want to find.
+                                                                        'Or the relevant data manipulations that we want to make with it. 
+            
+            CleanValue = Left(JnoToCheck, 6)
+            
+            FindOldValue = CleanValue
+            
+            Close #1
+            
+            Exit Function
+
+        End If
+            
+Loop
+        
+End Function      
+            
